@@ -8,6 +8,7 @@ using Firebase.Database;
 using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 public class FirebaseInit : MonoBehaviour
 {
@@ -20,12 +21,14 @@ public class FirebaseInit : MonoBehaviour
     public TMP_InputField _playerNameField;
     public TMP_InputField _matchNumberField;
 
-    private object lastGameData;
-
+    private GameData _lastGameData;
     private readonly UnityEvent _OnFirebaseInitialized = new UnityEvent();
     private FirebaseDatabase _database;
-    private string _gameNum;
+    private string _gameNum = "";
     private bool _inGame = false;
+    private List<int> newPlayersInEachRoom = new List<int>();
+    private List<int> oldPlayersInEachRoom = new List<int>();
+    private int roomUpdated = 0;
 
     private void Start()
     {
@@ -49,6 +52,12 @@ public class FirebaseInit : MonoBehaviour
         });
     }
 
+    private void UpdateGameStats()
+    {
+        if (_gameNum.Equals((roomUpdated + 1).ToString()))
+            _secondUISet.transform.GetChild(1).GetComponent<TMP_Text>().text = "Number of Players here: " + newPlayersInEachRoom[roomUpdated].ToString();
+    }
+
     private void EnablePlayButton()
     {
         _playButton.interactable = true;
@@ -56,6 +65,50 @@ public class FirebaseInit : MonoBehaviour
 
         //Retrieve the default database
         _database = FirebaseDatabase.DefaultInstance;
+        _database.RootReference.ValueChanged += HandleValueChanged;
+    }
+
+    private void OnDestroy()
+    {
+        _database.RootReference.ValueChanged -= HandleValueChanged;
+        _database = null;
+    }
+
+    private void HandleValueChanged(object sender, ValueChangedEventArgs e)
+    {
+        var json = e.Snapshot.GetRawJsonValue();
+        Debug.Log(json);
+        ParseIncomingJson(json);
+        if (!string.IsNullOrEmpty(json))
+        {
+            var gameData = JsonUtility.FromJson<GameData>(json);
+            _lastGameData = gameData;
+            UpdateGameStats();
+            oldPlayersInEachRoom = newPlayersInEachRoom;
+        }
+    }
+
+    private void ParseIncomingJson(string json)
+    {
+        newPlayersInEachRoom = new List<int>();
+        string[] splitResult = json.Split(',');
+        for (int i = 1; i < splitResult.Length; i++)
+        {
+            string[] piece = splitResult[i].Split(':');
+            char c = (piece[1].ToCharArray())[0];
+            int numP = int.Parse(c.ToString());
+            newPlayersInEachRoom.Add(numP);
+        }
+
+        for (int i = 0; i < oldPlayersInEachRoom.Count; i++)
+        {
+            if (oldPlayersInEachRoom[i] != newPlayersInEachRoom[i])
+                roomUpdated = i;
+        }
+        //foreach (int i in numPlayersInEachRoom)
+        //{
+        //    Debug.Log(i);
+        //}
     }
 
     public void GameButtonFunc()
@@ -114,7 +167,6 @@ public class FirebaseInit : MonoBehaviour
                         i++;
                     }
 
-                    //Dictionary<string, int> newGameEntry = new Dictionary<string, int> { { "NumPlayers", 1 } };
                     GameData gd = new GameData(1L);
 
                     //Write to the database
@@ -122,8 +174,8 @@ public class FirebaseInit : MonoBehaviour
                     yield return new WaitUntil(() => writeNewGame.IsCompleted);
 
                     _inGame = true;
-                    _gameNum = i.ToString();
-                    SwitchUI(i.ToString(), 1.ToString());
+                    _gameNum = (i + 1).ToString();
+                    SwitchUI((i + 1).ToString(), 1.ToString());
                 }
             }
             else
@@ -146,7 +198,6 @@ public class FirebaseInit : MonoBehaviour
             string value = currentNumPlayers.Result.Value.ToString();
             int newValue = int.Parse(value) - 1;
 
-            //Dictionary<string, int> newGameEntry = new Dictionary<string, int> { { "NumPlayers", newValue } };
             GameData gd = new GameData(newValue);
 
             //Write to the database
@@ -181,13 +232,13 @@ public class FirebaseInit : MonoBehaviour
 
     private Task SetNumberOfPlayersInGame(string childPath, GameData gd)
     {
-        if (!gd.Equals(lastGameData))
+        if (!gd.Equals(_lastGameData))
         {
             Task task = _database
                  .GetReference("Games")
                  .Child(childPath)
                  .Child("NumPlayers")
-                 .SetValueAsync(gd.NumPlayers);
+                 .SetValueAsync(gd.numPlayers);
 
             return task;
         }
