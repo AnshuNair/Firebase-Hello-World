@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>352753644171-r9hj7iln7d56mq1csijj8t35mufqpqr7.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.352753644171-r9hj7iln7d56mq1csijj8t35mufqpqr7</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBizX5gduyw68yWJpVUoD76HQrVJdfH2S0</string>
+	<key>GCM_SENDER_ID</key>
+	<string>352753644171</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.google.firebase.AnshuFirebaseHelloWorld</string>
+	<key>PROJECT_ID</key>
+	<string>anshu-firebase-hello-world</string>
+	<key>STORAGE_BUCKET</key>
+	<string>anshu-firebase-hello-world.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:352753644171:ios:ad2a2d25af8c4252371a8e</string>
+	<key>DATABASE_URL</key>
+	<string>https://anshu-firebase-hello-world.firebaseio.com</string>
+</dict>
+</plist>
