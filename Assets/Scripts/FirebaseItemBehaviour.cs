@@ -23,7 +23,7 @@ public class FirebaseItemBehaviour : MonoBehaviour
     private void Start()
     {
         //Add a listener to our Unity Event
-        _OnFirebaseInitialized.AddListener(EnablePlayButton);
+        _OnFirebaseInitialized.AddListener(AfterFirebaseInitialization);
         _firebaseConnectionText.text = "Connecting...";
 
         //Initialize Firebase
@@ -42,7 +42,8 @@ public class FirebaseItemBehaviour : MonoBehaviour
         });
     }
 
-    private void EnablePlayButton()
+    //Called at _OnFirebaseInitialized.Invoke()
+    private void AfterFirebaseInitialization()
     {
         _firebaseConnectionText.text = "Connected to Firebase";
 
@@ -51,12 +52,14 @@ public class FirebaseItemBehaviour : MonoBehaviour
         _database.GetReference("Item").ValueChanged += HandleValueChanged;
     }
 
+    //Remove event listener on destroy
     private void OnDestroy()
     {
         _database.GetReference("Item").ValueChanged -= HandleValueChanged;
         _database = null;
     }
 
+    //Listener function for when DB is updated. Not used in this demo.
     private void HandleValueChanged(object sender, ValueChangedEventArgs e)
     {
         var json = e.Snapshot.GetRawJsonValue();
@@ -68,11 +71,14 @@ public class FirebaseItemBehaviour : MonoBehaviour
         }
     }
 
+    //This function is the OnClick() listener for the big item button in the scene
     public void ItemButtonFunc()
     {
         StartCoroutine(AfterAcquireTransaction());
     }
 
+    //After the transaction is complete, check if the item owner in DB is the same as the entered player name
+    //Else logic is handled in the AcquireItem() function
     private IEnumerator AfterAcquireTransaction()
     {
         var transactionTask = AcquireItem();
@@ -92,6 +98,9 @@ public class FirebaseItemBehaviour : MonoBehaviour
         }
     }
 
+    //Transaction happens here.
+    //NOTE: I had to remove all TransactionResult.Abort() statements because whenever the transaction failed, I would get a FireaseException: Rethrow AggregateException
+    //Nothing is written to the DB if the acquired boolean is false, even though the transaction succeeds everytime.
     private async Task<DataSnapshot> AcquireItem()
     {
         return await _database.GetReference("Item").RunTransaction(mutableData =>
@@ -123,6 +132,7 @@ public class FirebaseItemBehaviour : MonoBehaviour
         });
     }
 
+    //Shows the button and text elements once the player enters a name
     public void OnPlayerNameEntered()
     {
         if (playerNameInput.text.Equals(""))
