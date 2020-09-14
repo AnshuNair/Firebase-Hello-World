@@ -10,7 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-public class FirebaseInit : MonoBehaviour
+public class FirebaseMatchFinder : MonoBehaviour
 {
     //Populated in the inspector
     public TMP_Text _firebaseConnectionText;
@@ -65,12 +65,12 @@ public class FirebaseInit : MonoBehaviour
 
         //Retrieve the default database
         _database = FirebaseDatabase.DefaultInstance;
-        _database.RootReference.ValueChanged += HandleValueChanged;
+        _database.GetReference("Games").ValueChanged += HandleValueChanged;
     }
 
     private void OnDestroy()
     {
-        _database.RootReference.ValueChanged -= HandleValueChanged;
+        _database.GetReference("Games").ValueChanged -= HandleValueChanged;
         _database = null;
     }
 
@@ -105,10 +105,6 @@ public class FirebaseInit : MonoBehaviour
             if (oldPlayersInEachRoom[i] != newPlayersInEachRoom[i])
                 roomUpdated = i;
         }
-        //foreach (int i in numPlayersInEachRoom)
-        //{
-        //    Debug.Log(i);
-        //}
     }
 
     public void GameButtonFunc()

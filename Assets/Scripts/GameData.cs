@@ -12,5 +12,4 @@ public class GameData
     {
         numPlayers = numP;
     }
-
 }
